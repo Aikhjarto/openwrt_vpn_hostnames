@@ -1,0 +1,28 @@
+#!/bin/sh /etc/rc.common
+# DNS names for WireGuard peers, see /usr/local/bin/wg-hosts.sh (2026-11-09)
+
+START=99
+USE_PROCD=1
+IFACE=Wireguard
+
+start_service() {
+	procd_open_instance
+	procd_set_param command /usr/local/bin/wg-hosts.sh "$IFACE"
+	procd_set_param respawn
+	procd_set_param stderr 1
+	procd_close_instance
+}
+
+stop_service() {
+	rm -f "/tmp/hosts/wireguard-$IFACE"
+	ubus call service signal '{"name":"dnsmasq","signal":1}' >/dev/null 2>&1
+}
+
+reload_service() {
+	stop
+	start
+}
+
+service_triggers() {
+	procd_add_reload_trigger network
+}
