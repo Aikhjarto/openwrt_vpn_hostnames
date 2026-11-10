@@ -81,6 +81,23 @@ Keep everything across `sysupgrade` by adding these lines to `/etc/sysupgrade.co
 /etc/rc.d/S99wg-hosts
 ```
 
+### As apk packages
+
+The `Makefile` builds two architecture-independent packages with the OpenWrt SDK (any target):
+`wg-hosts` (depends on `wireguard-tools`) and `openvpn-hosts`. They install to the same paths
+as above.
+
+```sh
+ln -s /path/to/openwrt_vpn_hostnames <sdk>/package/vpn-hostnames
+make defconfig
+make package/vpn-hostnames/compile
+# -> bin/packages/<arch>/base/wg-hosts-1.0-r1.apk, openvpn-hosts-1.0-r1.apk
+apk add --allow-untrusted ./wg-hosts-1.0-r1.apk     # on the router; enables and starts the service
+```
+
+Packages installed this way are not part of the firmware, so after a `sysupgrade` (or an `owut`
+upgrade) they have to be installed again unless the files are listed in `/etc/sysupgrade.conf`.
+
 ## Check
 
 ```sh
